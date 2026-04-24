@@ -870,6 +870,17 @@ hr.div { border: none; border-top: 1px solid var(--card-border); margin: 14px 0;
 .hdm-ans-label.lbl-skip     { background: rgba(100,100,100,.2); color: var(--text-muted); }
 .hdm-ans-text { color: var(--text-dim); line-height: 1.4; font-family: inherit; }
 .hdm-no-data  { text-align: center; padding: 40px 20px; color: var(--text-muted); font-style: italic; font-size: 14px; line-height: 1.7; }
+.hdm-filters {
+  display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;
+}
+.hdm-filter-btn {
+  padding: 5px 14px; border-radius: 20px; font-size: 12px; font-family: inherit;
+  border: 1px solid var(--card-border); background: transparent;
+  color: var(--text-dim); cursor: pointer; font-weight: 700;
+  transition: border-color .15s, background .15s, color .15s;
+}
+.hdm-filter-btn:hover  { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+.hdm-filter-btn.active { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); }
 /* Make tracker-take rows feel clickable */
 .tracker-take {
   cursor: pointer;
@@ -1358,6 +1369,11 @@ kbd {
       <button class="hdm-close" onclick="closeHistoryDetail()">✕ Close</button>
     </div>
     <div class="hdm-summary" id="hdm-summary"></div>
+    <div class="hdm-filters" id="hdm-filters" style="display:none;">
+      <button class="hdm-filter-btn active" onclick="filterHDM('all')"    id="hdmf-all">All</button>
+      <button class="hdm-filter-btn"        onclick="filterHDM('wrong')"  id="hdmf-wrong">❌ Wrong</button>
+      <button class="hdm-filter-btn"        onclick="filterHDM('correct')" id="hdmf-correct">✅ Correct</button>
+    </div>
     <div class="hdm-list"    id="hdm-list"></div>
   </div>
 </div>
@@ -2145,12 +2161,14 @@ async function renderTrackerPanel() {
 // ============================================================
 // HISTORY DETAIL MODAL
 // ============================================================
+let _hdmCurrentAnswers = []; // used by filterHDM
+
 function showHistoryDetail(uid) {
   const e = _hdmEntries[uid];
   if (!e) return;
 
   document.getElementById('hdm-title').textContent =
-    `${ordinal(e.take)} Take — ${escHtml(e.deckName || 'Unknown Deck')}`;
+    `${ordinal(e.take)} Take — ${e.deckName || 'Unknown Deck'}`;
   document.getElementById('hdm-meta').textContent =
     `${e.date}  ·  ${formatDuration(e.duration)}`;
 
@@ -2162,59 +2180,89 @@ function showHistoryDetail(uid) {
     <span style="color:var(--text-muted);">⏱ ${formatDuration(e.duration)}</span>
   `;
 
-  const listEl = document.getElementById('hdm-list');
   const answers = e.answers;
+  _hdmCurrentAnswers = answers || [];
 
+  const filtersEl = document.getElementById('hdm-filters');
   if (!answers || !answers.length) {
-    listEl.innerHTML = `
+    filtersEl.style.display = 'none';
+    document.getElementById('hdm-list').innerHTML = `
       <div class="hdm-no-data">
         📭 No per-question data for this attempt.<br>
         <span style="font-size:12px;">Only attempts taken after this update include answer details.</span>
       </div>`;
   } else {
-    let html = '';
-    answers.forEach((a, i) => {
-      const cls = a.skipped ? '' : (a.ok ? 'hdm-correct' : 'hdm-wrong');
-      const icon = a.skipped ? '⬜' : (a.ok ? '✅' : '❌');
-      html += `<div class="hdm-q-item ${cls}">
-        <div class="hdm-q-num">${icon} Question ${i + 1}</div>
-        <div class="hdm-q-text">${escHtml(a.q || '(no question text)')}</div>`;
-
-      if (a.skipped) {
-        html += `<div class="hdm-ans-row">
-          <span class="hdm-ans-label lbl-skip">SKIPPED</span>
-          <span class="hdm-ans-text">${escHtml(a.correct)}</span>
-        </div>`;
-      } else if (a.ok) {
-        html += `<div class="hdm-ans-row">
-          <span class="hdm-ans-label lbl-correct">✓ Correct</span>
-          <span class="hdm-ans-text">${escHtml(a.chosen)}</span>
-        </div>`;
-      } else {
-        html += `<div class="hdm-ans-row">
-          <span class="hdm-ans-label lbl-wrong">✗ Your Answer</span>
-          <span class="hdm-ans-text">${escHtml(a.chosen || '(not answered)')}</span>
-        </div>
-        <div class="hdm-ans-row">
-          <span class="hdm-ans-label lbl-correct">✓ Correct</span>
-          <span class="hdm-ans-text">${escHtml(a.correct)}</span>
-        </div>`;
-      }
-      html += `</div>`;
-    });
-    listEl.innerHTML = html;
+    filtersEl.style.display = 'flex';
+    // Reset to "All" filter
+    document.querySelectorAll('.hdm-filter-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('hdmf-all').classList.add('active');
+    renderHDMList('all');
   }
 
   document.getElementById('history-detail-modal').classList.add('open');
+}
+
+function renderHDMList(filter) {
+  const answers = _hdmCurrentAnswers;
+  let html = '';
+  let shown = 0;
+  answers.forEach((a, i) => {
+    if (filter === 'correct' && !a.ok) return;
+    if (filter === 'wrong'   &&  a.ok) return;
+    shown++;
+    const cls  = a.skipped ? '' : (a.ok ? 'hdm-correct' : 'hdm-wrong');
+    const icon = a.skipped ? '⬜' : (a.ok ? '✅' : '❌');
+    html += `<div class="hdm-q-item ${cls}">
+      <div class="hdm-q-num">${icon} Question ${i + 1}</div>
+      <div class="hdm-q-text">${escHtml(a.q || '(no question text)')}</div>`;
+
+    if (a.skipped) {
+      html += `<div class="hdm-ans-row">
+        <span class="hdm-ans-label lbl-skip">SKIPPED</span>
+        <span class="hdm-ans-text">${escHtml(a.correct)}</span>
+      </div>`;
+    } else if (a.ok) {
+      html += `<div class="hdm-ans-row">
+        <span class="hdm-ans-label lbl-correct">✓ Correct</span>
+        <span class="hdm-ans-text">${escHtml(a.chosen)}</span>
+      </div>`;
+    } else {
+      html += `<div class="hdm-ans-row">
+        <span class="hdm-ans-label lbl-wrong">✗ Your Answer</span>
+        <span class="hdm-ans-text">${escHtml(a.chosen || '(not answered)')}</span>
+      </div>
+      <div class="hdm-ans-row">
+        <span class="hdm-ans-label lbl-correct">✓ Correct</span>
+        <span class="hdm-ans-text">${escHtml(a.correct)}</span>
+      </div>`;
+    }
+    html += `</div>`;
+  });
+
+  if (!shown) {
+    html = `<div class="hdm-no-data">No ${filter === 'correct' ? 'correct' : 'wrong'} answers in this attempt.</div>`;
+  }
+  document.getElementById('hdm-list').innerHTML = html;
+}
+
+function filterHDM(filter) {
+  document.querySelectorAll('.hdm-filter-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`hdmf-${filter}`).classList.add('active');
+  renderHDMList(filter);
 }
 
 function closeHistoryDetail() {
   document.getElementById('history-detail-modal').classList.remove('open');
 }
 
-// Close on backdrop click
+// Close on backdrop click or Escape key
 document.getElementById('history-detail-modal').addEventListener('click', function(e) {
   if (e.target === this) closeHistoryDetail();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' && document.getElementById('history-detail-modal').classList.contains('open')) {
+    closeHistoryDetail();
+  }
 });
 
 // ============================================================
