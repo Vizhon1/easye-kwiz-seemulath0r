@@ -804,6 +804,115 @@ hr.div { border: none; border-top: 1px solid var(--card-border); margin: 14px 0;
   opacity: 0.5;
 }
 
+/* ===== TIMER ===== */
+.timer-chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 4px 11px; border-radius: 20px;
+  border: 1px solid var(--card-border);
+  font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 700;
+  color: var(--text-dim); background: transparent;
+  cursor: pointer; user-select: none;
+  transition: border-color .2s, color .2s, background .2s;
+  white-space: nowrap;
+}
+.timer-chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+.timer-chip.tc-running  { color: var(--accent); border-color: rgba(74,144,226,.4); }
+.timer-chip.tc-warning  { color: #ff9800; border-color: rgba(255,152,0,.5); animation: timerPulse 1s ease-in-out infinite; }
+.timer-chip.tc-danger   { color: var(--red);  border-color: rgba(239,83,80,.5);  animation: timerPulse .5s ease-in-out infinite; }
+@keyframes timerPulse { 0%,100%{opacity:1} 50%{opacity:.55} }
+.timer-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+/* Timer settings modal */
+#timer-modal {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.75); z-index: 25000;
+  align-items: center; justify-content: center; padding: 20px;
+}
+#timer-modal.open { display: flex; }
+.timer-modal-box {
+  background: var(--surface); border: 1px solid var(--card-border);
+  border-radius: 14px; padding: 26px 24px 22px;
+  max-width: 360px; width: 100%;
+  box-shadow: 0 20px 60px rgba(0,0,0,.65);
+  animation: popIn .25s cubic-bezier(.175,.885,.32,1.275);
+}
+.tm-title { font-size: 16px; font-weight: 700; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+.tm-section { margin-bottom: 16px; }
+.tm-label { font-size: 12px; color: var(--text-muted); font-family: 'DM Mono', monospace; margin-bottom: 8px; text-transform: uppercase; letter-spacing: .4px; }
+.tm-mode-btns { display: flex; gap: 8px; }
+.tm-mode-btn {
+  flex: 1; padding: 9px 0; border-radius: 8px; border: 1px solid var(--card-border);
+  background: transparent; color: var(--text-dim); font-family: inherit;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  transition: border-color .15s, background .15s, color .15s;
+}
+.tm-mode-btn:hover  { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+.tm-mode-btn.active { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); }
+.tm-countdown-cfg { display: none; margin-top: 12px; }
+.tm-countdown-cfg.visible { display: block; }
+.tm-time-inputs { display: flex; align-items: center; gap: 8px; }
+.tm-time-input {
+  width: 64px; padding: 8px 10px; text-align: center;
+  background: var(--bg); border: 1px solid var(--card-border);
+  border-radius: 8px; color: var(--text); font-size: 18px; font-weight: 700;
+  font-family: 'DM Mono', monospace; outline: none;
+  transition: border-color .2s;
+}
+.tm-time-input:focus { border-color: var(--accent); }
+.tm-colon { font-size: 22px; font-weight: 700; color: var(--text-dim); font-family: 'DM Mono', monospace; }
+.tm-actions { display: flex; gap: 10px; margin-top: 20px; }
+.tm-btn-start {
+  flex: 1; padding: 10px 0; background: var(--accent); color: #fff;
+  border: none; border-radius: 8px; font-family: inherit; font-size: 15px;
+  font-weight: 700; cursor: pointer; transition: opacity .2s;
+}
+.tm-btn-start:hover { opacity: .85; }
+.tm-btn-cancel {
+  padding: 10px 18px; background: transparent; border: 1px solid var(--card-border);
+  border-radius: 8px; color: var(--text-dim); font-family: inherit;
+  font-size: 14px; cursor: pointer; transition: border-color .2s;
+}
+.tm-btn-cancel:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ===== DECK PICKER MODAL ===== */
+#deck-picker-modal {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.78); z-index: 28000;
+  align-items: center; justify-content: center; padding: 20px;
+}
+#deck-picker-modal.open { display: flex; }
+.dp-box {
+  background: var(--surface); border: 1px solid var(--card-border);
+  border-radius: 16px; padding: 26px 24px 22px; max-width: 420px; width: 100%;
+  box-shadow: 0 20px 60px rgba(0,0,0,.7);
+  animation: popIn .25s cubic-bezier(.175,.885,.32,1.275);
+}
+.dp-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid var(--card-border);
+}
+.dp-title { font-size: 16px; font-weight: 700; }
+.dp-close {
+  background: none; border: 1px solid var(--card-border); border-radius: 8px;
+  padding: 4px 10px; color: var(--text-dim); cursor: pointer; font-size: 13px;
+  transition: border-color .2s, color .2s; font-family: inherit;
+}
+.dp-close:hover { border-color: var(--accent); color: var(--accent); }
+.dp-list { display: flex; flex-direction: column; gap: 9px; max-height: 60vh; overflow-y: auto; }
+.dp-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 16px; border-radius: 10px;
+  border: 1px solid var(--card-border); background: rgba(0,0,0,.18);
+  cursor: pointer; transition: border-color .2s, background .2s;
+}
+.dp-item:hover { border-color: var(--accent); background: var(--accent-dim); }
+.dp-item-icon { font-size: 22px; flex-shrink: 0; }
+.dp-item-name { font-size: 14px; font-weight: 700; flex: 1; }
+.dp-item-cached { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--green); background: rgba(76,175,80,.12); border: 1px solid rgba(76,175,80,.3); padding: 2px 7px; border-radius: 10px; white-space: nowrap; }
+.dp-item-size  { font-size: 11px; color: var(--text-muted); font-family: 'DM Mono', monospace; }
+.dp-hint { font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 14px; font-style: italic; }
+.dp-loading { text-align: center; padding: 30px 20px; color: var(--text-muted); font-style: italic; }
+
 /* ===== HISTORY DETAIL MODAL ===== */
 #history-detail-modal {
   display: none; position: fixed; inset: 0;
@@ -1088,9 +1197,33 @@ kbd {
   line-height: 1.4;
 }
 @media (max-width: 600px) { .kbd-hints { display: none; } }
+
+/* ===== TOAST NOTIFICATION ===== */
+#toast-container {
+  position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+  z-index: 99999; display: flex; flex-direction: column; align-items: center; gap: 10px;
+  pointer-events: none;
+}
+.toast {
+  background: var(--surface); border: 1px solid var(--card-border);
+  border-radius: 10px; padding: 12px 22px;
+  font-size: 14px; color: var(--text); font-family: 'DM Mono', monospace;
+  box-shadow: 0 6px 28px rgba(0,0,0,0.55);
+  animation: toastIn .28s cubic-bezier(.175,.885,.32,1.275) forwards;
+  pointer-events: auto; max-width: 420px; text-align: center; line-height: 1.5;
+}
+.toast.toast-warn  { border-color: #ff9800; background: #1c1400; }
+.toast.toast-error { border-color: var(--red); background: #1c0000; }
+.toast.toast-ok    { border-color: var(--green); background: #001c00; }
+.toast.toast-out   { animation: toastOut .3s ease forwards; }
+@keyframes toastIn  { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+@keyframes toastOut { from { opacity:1; transform:translateY(0); } to { opacity:0; transform:translateY(10px); } }
 </style>
 </head>
 <body>
+
+<!-- Toast notification container -->
+<div id="toast-container"></div>
 
 <!-- Persistent Site Header -->
 <div id="site-header">
@@ -1217,6 +1350,10 @@ kbd {
         <div class="top-bar-right">
           <button class="score-toggle-btn" onclick="toggleScoreBadge()">🔘 Score</button>
           <div class="score-badge" id="score-badge" onclick="toggleScorePanel()">📊 0/0</div>
+          <div class="timer-chip" id="timer-chip" onclick="openTimerModal()" title="Timer — click to configure">
+            <span class="timer-dot" id="timer-dot"></span>
+            <span id="timer-display">0:00</span>
+          </div>
           <div class="card-counter" id="card-counter" onclick="openJumpInput()" title="Click to jump to a question">1 / 0</div>
           <input type="number" id="jump-input" class="jump-input" min="1" placeholder="#"
             onblur="closeJumpInput()" onkeydown="handleJumpKey(event)">
@@ -1358,6 +1495,48 @@ kbd {
   </div>
 </div>
 
+<!-- ==================== TIMER MODAL ==================== -->
+<div id="timer-modal">
+  <div class="timer-modal-box">
+    <div class="tm-title">⏱ Timer</div>
+    <div class="tm-section">
+      <div class="tm-label">Mode</div>
+      <div class="tm-mode-btns">
+        <button class="tm-mode-btn active" id="tm-btn-stopwatch" onclick="selectTimerMode('stopwatch')">⏱ Stopwatch</button>
+        <button class="tm-mode-btn"        id="tm-btn-countdown" onclick="selectTimerMode('countdown')">⏳ Countdown</button>
+      </div>
+      <div class="tm-countdown-cfg" id="tm-countdown-cfg">
+        <div class="tm-label" style="margin-top:12px;">Time Limit</div>
+        <div class="tm-time-inputs">
+          <input type="number" id="tm-hours"   class="tm-time-input" min="0" max="9"  value="0" placeholder="HH">
+          <span class="tm-colon">:</span>
+          <input type="number" id="tm-minutes" class="tm-time-input" min="0" max="59" value="30" placeholder="MM">
+          <span class="tm-colon">:</span>
+          <input type="number" id="tm-seconds" class="tm-time-input" min="0" max="59" value="0" placeholder="SS">
+        </div>
+      </div>
+    </div>
+    <div class="tm-actions">
+      <button class="tm-btn-cancel" onclick="closeTimerModal()">Cancel</button>
+      <button class="tm-btn-start"  onclick="applyTimerSettings()">▶ Start</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== DECK PICKER MODAL ==================== -->
+<div id="deck-picker-modal">
+  <div class="dp-box">
+    <div class="dp-header">
+      <span class="dp-title">📚 Select a Deck</span>
+      <button class="dp-close" onclick="closeDeckPicker()">✕ Close</button>
+    </div>
+    <div id="dp-list">
+      <div class="dp-loading">⏳ Fetching deck list…</div>
+    </div>
+    <div class="dp-hint">Cached decks load instantly • Others download from GitHub</div>
+  </div>
+</div>
+
 <!-- ==================== HISTORY DETAIL MODAL ==================== -->
 <div id="history-detail-modal">
   <div class="hdm-box">
@@ -1398,15 +1577,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
-
-// ============================================================
-// SHARED DECK — GitHub Release URL (update the file here to update for all users)
-// ============================================================
-// File must live at: repo root → decks/1qaz2wsxMainDeck3edc.apkg
-// GitHub Pages serves this with proper CORS headers (no proxy needed).
-// DO NOT use a GitHub Releases URL here — those redirect to AWS S3 which blocks CORS.
-const SHARED_DECK_URL = 'https://viz1125.github.io/easye-kwiz-seemulath0r/decks/1qaz2wsxMainDeck3edc.apkg';
-const SHARED_DECK_NAME = '1qaz2wsxMainDeck3edc';
 
 // ============================================================
 // AUTH STATE MANAGEMENT
@@ -1674,27 +1844,155 @@ async function saveScoreAsync(s) {
 }
 
 // ============================================================
-// SHARED DECK LOADER
+// SHARED DECK — GitHub Pages + API (multi-deck, cached)
 // ============================================================
+const GITHUB_REPO      = 'Viz1125/easye-kwiz-seemulath0r';
+const GITHUB_DECKS_API = `https://api.github.com/repos/${GITHUB_REPO}/contents/decks`;
+const DECK_BASE_URL    = 'https://viz1125.github.io/easye-kwiz-seemulath0r/decks/';
+
+// ── IndexedDB cache so we never re-download the same APKG ──
+const IDB_NAME = 'apkg-deck-cache', IDB_STORE = 'decks', IDB_VER = 1;
+function openDeckIDB() {
+  return new Promise((res, rej) => {
+    const req = indexedDB.open(IDB_NAME, IDB_VER);
+    req.onupgradeneeded = e => e.target.result.createObjectStore(IDB_STORE);
+    req.onsuccess = e => res(e.target.result);
+    req.onerror   = () => rej(req.error);
+  });
+}
+async function idbGet(name) {
+  try {
+    const db = await openDeckIDB();
+    return new Promise(res => {
+      const tx = db.transaction(IDB_STORE, 'readonly');
+      const r  = tx.objectStore(IDB_STORE).get(name);
+      r.onsuccess = () => res(r.result || null);
+      r.onerror   = () => res(null);
+    });
+  } catch { return null; }
+}
+async function idbPut(name, buf) {
+  try {
+    const db = await openDeckIDB();
+    return new Promise(res => {
+      const tx = db.transaction(IDB_STORE, 'readwrite');
+      tx.objectStore(IDB_STORE).put(buf, name);
+      tx.oncomplete = res; tx.onerror = res;
+    });
+  } catch {}
+}
+async function idbKeys() {
+  try {
+    const db = await openDeckIDB();
+    return new Promise(res => {
+      const tx = db.transaction(IDB_STORE, 'readonly');
+      const r  = tx.objectStore(IDB_STORE).getAllKeys();
+      r.onsuccess = () => res(r.result || []);
+      r.onerror   = () => res([]);
+    });
+  } catch { return []; }
+}
+
+// ── Fetch deck list from GitHub API ──
+async function fetchGitHubDeckList() {
+  const resp = await fetch(GITHUB_DECKS_API, { headers: { Accept: 'application/vnd.github+json' } });
+  if (!resp.ok) throw new Error(`GitHub API ${resp.status}`);
+  const files = await resp.json();
+  if (!Array.isArray(files)) throw new Error('Unexpected API response');
+  return files.filter(f => f.name.toLowerCase().endsWith('.apkg'));
+}
+
+// ── Entry point: "Load Main Deck" button ──
 async function loadSharedDeck() {
   const btn = document.getElementById('shared-deck-btn');
-  if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Downloading…'; }
-  show('loading');
-  status('Downloading main deck from GitHub…');
+  if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Checking…'; }
   try {
-    const resp = await fetch(SHARED_DECK_URL);
-    if (!resp.ok) throw new Error(`HTTP ${resp.status} — check the GitHub URL or your connection.`);
-    const blob = await resp.blob();
-    const file = new File([blob], SHARED_DECK_NAME + '.apkg', { type: 'application/octet-stream' });
-    Object.defineProperty(file, '_isShared', { value: true });
-    await loadApkg(file);
+    const deckFiles = await fetchGitHubDeckList();
+    if (deckFiles.length === 0) throw new Error('No .apkg files found in the decks folder.');
+
+    if (deckFiles.length === 1) {
+      // Only one deck — load it directly (with cache)
+      if (btn) { btn.disabled = false; btn.innerHTML = '📥 Load Main Deck'; }
+      await loadDeckByInfo(deckFiles[0]);
+    } else {
+      // Multiple decks — show picker
+      if (btn) { btn.disabled = false; btn.innerHTML = '📥 Load Main Deck'; }
+      await openDeckPicker(deckFiles);
+    }
   } catch(e) {
-    status('❌ Failed to load main deck: ' + e.message);
-    show('upload');
-  } finally {
+    console.warn('Deck list fetch failed:', e);
+    // Fallback: try legacy single-deck direct load from cache or network
     if (btn) { btn.disabled = false; btn.innerHTML = '📥 Load Main Deck'; }
+    await loadDeckByUrl(
+      DECK_BASE_URL + '1qaz2wsxMainDeck3edc.apkg',
+      '1qaz2wsxMainDeck3edc'
+    );
   }
 }
+
+// ── Load a deck described by a GitHub API file object ──
+async function loadDeckByInfo(fileInfo) {
+  const name = fileInfo.name.replace(/\.apkg$/i, '');
+  const url  = DECK_BASE_URL + encodeURIComponent(fileInfo.name);
+  await loadDeckByUrl(url, name);
+}
+
+// ── Download (or serve from cache) and open an APKG ──
+async function loadDeckByUrl(url, name) {
+  show('loading');
+  const cached = await idbGet(name);
+  if (cached) {
+    status(`📦 Loading "${name}" from cache…`);
+    const file = new File([cached], name + '.apkg', { type: 'application/octet-stream' });
+    await loadApkg(file);
+    return;
+  }
+  status(`⬇️ Downloading "${name}" from GitHub…`);
+  try {
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const buf  = await resp.arrayBuffer();
+    status('💾 Saving to cache…');
+    await idbPut(name, buf);
+    const file = new File([buf], name + '.apkg', { type: 'application/octet-stream' });
+    await loadApkg(file);
+  } catch(e) {
+    status('❌ Failed: ' + e.message);
+    show('upload');
+  }
+}
+
+// ── Deck picker modal ──
+let _dpDeckFiles = []; // module-level so pickDeck can reference by index safely
+async function openDeckPicker(deckFiles) {
+  _dpDeckFiles = deckFiles;
+  const listEl = document.getElementById('dp-list');
+  const cachedKeys = await idbKeys();
+  listEl.innerHTML = deckFiles.map((f, idx) => {
+    const name  = f.name.replace(/\.apkg$/i, '');
+    const isCached = cachedKeys.includes(name);
+    const sizeMb = f.size ? (f.size / 1048576).toFixed(1) + ' MB' : '';
+    return `
+      <div class="dp-item" onclick="pickDeck(${idx})">
+        <span class="dp-item-icon">📦</span>
+        <span class="dp-item-name">${escHtml(name)}</span>
+        ${isCached ? '<span class="dp-item-cached">⚡ Cached</span>' : `<span class="dp-item-size">${sizeMb}</span>`}
+      </div>`;
+  }).join('');
+  document.getElementById('deck-picker-modal').classList.add('open');
+}
+function closeDeckPicker() {
+  document.getElementById('deck-picker-modal').classList.remove('open');
+}
+async function pickDeck(idx) {
+  closeDeckPicker();
+  const fileInfo = _dpDeckFiles[idx];
+  if (!fileInfo) return;
+  await loadDeckByInfo(fileInfo);
+}
+document.getElementById('deck-picker-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeDeckPicker();
+});
 const S = {
   notes:[], shuffles:[], media: new Map(),
   answered:{}, idx:0, deckName:'', deckKey:'',
@@ -1721,6 +2019,11 @@ const S = {
   quizStartTime: null,
   takeCount: 0,
   autoAdvanceTimer: null,
+  // Timer
+  timerInterval: null,
+  timerElapsed: 0,    // seconds elapsed (stopwatch) or remaining (countdown)
+  timerLimit: 0,      // 0 = stopwatch, >0 = countdown total seconds
+  timerRunning: false,
 };
 
 refreshScoreCache(); // Safe to call now — S is fully initialized above
@@ -1835,6 +2138,7 @@ function goToUpload() {
 
 function goBackFromQuiz() {
   if (S.autoAdvanceTimer) { clearTimeout(S.autoAdvanceTimer); S.autoAdvanceTimer = null; }
+  stopTimer();
   S.media.forEach(u => URL.revokeObjectURL(u));
   S.media.clear();
   Object.assign(S, {
@@ -2020,6 +2324,20 @@ function escHtml(str) {
   return String(str)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ── Toast notification ──
+function showToast(msg, type = '', durationMs = 3500) {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+  const el = document.createElement('div');
+  el.className = 'toast' + (type ? ' toast-' + type : '');
+  el.textContent = msg;
+  container.appendChild(el);
+  setTimeout(() => {
+    el.classList.add('toast-out');
+    el.addEventListener('animationend', () => el.remove(), { once: true });
+  }, durationMs);
 }
 
 async function selectQuiz(idx) {
@@ -2404,6 +2722,10 @@ async function resetQuiz() {
   saveScoreAsync({ correct:0, total:0 }).catch(e => console.warn('Score reset save failed:', e));
   reshuffleDeck();
   updateScoreUI();
+  // Restart timer from zero
+  S.timerElapsed = S.timerLimit > 0 ? S.timerLimit : 0;
+  updateTimerDisplay();
+  startTimer();
   await renderCard(0);
 }
 
@@ -2768,13 +3090,14 @@ async function submitQuiz() {
   const answeredCount = Object.keys(S.answered).length;
   if (answeredCount < S.answerableCount) {
     const remaining = S.answerableCount - answeredCount;
-    alert(`Please answer all questions before submitting. (${remaining} remaining)`);
+    showToast(`⚠ ${remaining} question${remaining !== 1 ? 's' : ''} still unanswered. Please answer all before submitting.`, 'warn', 4000);
     return;
   }
 
   // ── UI update is INSTANT — no awaiting Firestore ──
   S.submitted = true;
   if (S.autoAdvanceTimer) { clearTimeout(S.autoAdvanceTimer); S.autoAdvanceTimer = null; }
+  stopTimer();
   document.getElementById('submit-quiz-btn').classList.remove('visible');
   document.getElementById('next-unanswered-btn').classList.remove('visible');
   S.revealAnswers = true;
@@ -2813,7 +3136,7 @@ async function submitQuiz() {
           chosen:  ans ? (ans.chosenText || sh.opts[ans.chosen] || '') : '',
           correct: sh.correct || sh.opts[sh.ci] || '',
           ok:      ans ? !!ans.ok : false,
-          skipped: !ans
+          skipped: !ans || !!ans.skipped
         });
       }
 
@@ -2833,6 +3156,127 @@ async function submitQuiz() {
     } catch(e) { console.warn('History save failed:', e); }
   })();
 }
+
+// ============================================================
+// TIMER
+// ============================================================
+function fmtTimerTime(sec) {
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  const s = sec % 60;
+  if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  return `${m}:${String(s).padStart(2,'0')}`;
+}
+
+function startTimer() {
+  if (S.timerInterval) clearInterval(S.timerInterval);
+  S.timerRunning = true;
+  const chip = document.getElementById('timer-chip');
+  if (chip) chip.classList.add('tc-running');
+  S.timerInterval = setInterval(tickTimer, 1000);
+  tickTimer(); // immediate first tick
+}
+
+function stopTimer() {
+  if (S.timerInterval) { clearInterval(S.timerInterval); S.timerInterval = null; }
+  S.timerRunning = false;
+  const chip = document.getElementById('timer-chip');
+  if (chip) chip.classList.remove('tc-running','tc-warning','tc-danger');
+}
+
+function resetTimer() {
+  stopTimer();
+  S.timerElapsed = S.timerLimit > 0 ? S.timerLimit : 0;
+  updateTimerDisplay();
+}
+
+function tickTimer() {
+  if (S.timerLimit > 0) {
+    // Countdown
+    S.timerElapsed = Math.max(0, S.timerElapsed - 1);
+    updateTimerDisplay();
+    const chip = document.getElementById('timer-chip');
+    const pct  = S.timerElapsed / S.timerLimit;
+    if (chip) {
+      chip.classList.toggle('tc-warning', pct <= 0.25 && pct > 0.1);
+      chip.classList.toggle('tc-danger',  pct <= 0.1);
+      chip.classList.toggle('tc-running', pct > 0.25);
+    }
+    if (S.timerElapsed <= 0) {
+      stopTimer();
+      // Auto-submit if quiz is active
+      if (!S.submitted && S.answerableCount > 0) {
+        const chip = document.getElementById('timer-chip');
+        if (chip) { chip.textContent = '⏰ Time\'s up!'; }
+        // Fill any unanswered with a forced skip so submitQuiz doesn't block
+        for (let i = 0; i < S.notes.length; i++) {
+          if (S.answered[i] === undefined && S.shuffles[i] !== null) {
+            S.answered[i] = { chosen: -1, ok: false, chosenText: '', skipped: true };
+          }
+        }
+        showToast('⏰ Time\'s up! Submitting your quiz…', 'warn', 4000);
+        setTimeout(() => submitQuiz(), 800);
+      }
+    }
+  } else {
+    // Stopwatch
+    S.timerElapsed++;
+    updateTimerDisplay();
+  }
+}
+
+function updateTimerDisplay() {
+  const dispEl = document.getElementById('timer-display');
+  if (!dispEl) return;
+  const t = S.timerLimit > 0 ? S.timerElapsed : S.timerElapsed;
+  dispEl.textContent = fmtTimerTime(t);
+}
+
+// ── Timer modal ──
+function openTimerModal() {
+  // Reflect current mode
+  const isCountdown = S.timerLimit > 0;
+  selectTimerMode(isCountdown ? 'countdown' : 'stopwatch', true);
+  if (isCountdown) {
+    const h = Math.floor(S.timerLimit / 3600);
+    const m = Math.floor((S.timerLimit % 3600) / 60);
+    const s = S.timerLimit % 60;
+    document.getElementById('tm-hours').value   = h;
+    document.getElementById('tm-minutes').value = m;
+    document.getElementById('tm-seconds').value = s;
+  }
+  document.getElementById('timer-modal').classList.add('open');
+}
+function closeTimerModal() {
+  document.getElementById('timer-modal').classList.remove('open');
+}
+function selectTimerMode(mode, silent) {
+  document.getElementById('tm-btn-stopwatch').classList.toggle('active', mode === 'stopwatch');
+  document.getElementById('tm-btn-countdown').classList.toggle('active', mode === 'countdown');
+  document.getElementById('tm-countdown-cfg').classList.toggle('visible', mode === 'countdown');
+  document.getElementById('timer-modal')._pendingMode = mode;
+}
+function applyTimerSettings() {
+  const mode = document.getElementById('timer-modal')._pendingMode || 'stopwatch';
+  closeTimerModal();
+  if (mode === 'countdown') {
+    const h = parseInt(document.getElementById('tm-hours').value,10)   || 0;
+    const m = parseInt(document.getElementById('tm-minutes').value,10) || 0;
+    const s = parseInt(document.getElementById('tm-seconds').value,10) || 0;
+    const total = h*3600 + m*60 + s;
+    if (total <= 0) { showToast('⚠ Please enter a time greater than 0.', 'warn'); return; }
+    S.timerLimit   = total;
+    S.timerElapsed = total;
+  } else {
+    S.timerLimit   = 0;
+    S.timerElapsed = 0;
+  }
+  updateTimerDisplay();
+  startTimer();
+}
+document.getElementById('timer-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeTimerModal();
+});
 
 // ============================================================
 // NEXT UNANSWERED (new)
@@ -3346,6 +3790,11 @@ async function loadApkgCore(fileName, zip, buf, deckFilter) {
     show('quiz');
     S.quizStartTime = Date.now();
     loadTakeCount(S.deckKey); // fire-and-forget — populates S.takeCount in background
+    // Reset and start stopwatch timer
+    S.timerLimit   = 0;
+    S.timerElapsed = 0;
+    updateTimerDisplay();
+    startTimer();
     await renderCard(0);
     updateChecklist();
 
