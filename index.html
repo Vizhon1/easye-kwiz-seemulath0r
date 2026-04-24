@@ -139,15 +139,7 @@ body {
 /* ===== SCREENS: common ===== */
 #upload-screen, #loading-screen, #quiz-screen, #selection-screen { width: 100%; }
 #upload-screen {
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  max-width: 580px;
-  gap: 24px;
-  text-align: center;
-  margin: 0 auto;
+  display: none !important; /* replaced by inline upload panel on home screen */
 }
 #loading-screen {
   display: none;
@@ -1001,6 +993,61 @@ hr.div { border: none; border-top: 1px solid var(--card-border); margin: 14px 0;
   margin-top: 4px; opacity: 0.6;
 }
 
+/* ===== SELECTION SCREEN UPLOAD PANEL ===== */
+.sel-upload-panel {
+  margin-bottom: 22px;
+  border-radius: var(--radius);
+  border: 1px solid var(--card-border);
+  background: var(--surface2);
+  overflow: hidden;
+  animation: fadeSlideUp 0.25s ease both;
+}
+.sel-upload-panel-inner {
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+  max-width: 520px;
+  margin: 0 auto;
+}
+.sel-upload-panel .drop-zone {
+  width: 100%;
+}
+.sel-upload-panel .btn-shared-deck {
+  width: 100%;
+  max-width: 340px;
+}
+.sel-upload-panel .upload-actions { margin-top: 0; }
+
+/* Cached deck section on home */
+.cached-decks-section { margin-bottom: 6px; }
+.home-empty-state {
+  text-align: center;
+  padding: 50px 20px 30px;
+  color: var(--text-muted);
+}
+.home-empty-state .he-icon { font-size: 52px; display: block; margin-bottom: 16px; }
+.home-empty-state h3 { font-size: 18px; color: var(--text-dim); margin-bottom: 8px; font-weight: 700; }
+.home-empty-state p { font-size: 14px; line-height: 1.7; max-width: 340px; margin: 0 auto 20px; }
+.btn-load-first {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 28px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  transition: opacity .2s, transform .1s;
+}
+.btn-load-first:hover { opacity: .85; transform: translateY(-1px); }
+
 /* ===== RESPONSIVE ===== */
 @media(max-width: 820px) {
   .app-container { flex-direction: column; padding: 12px; }
@@ -1415,14 +1462,31 @@ kbd {
     <div id="selection-screen">
       <div class="sel-header">
         <div class="sel-title-area">
-          <span class="sel-logo">🃏</span>
+          <span class="sel-logo">🏠</span>
           <div>
-            <div class="sel-title">Choose a Quiz</div>
-            <div class="sel-subtitle" id="sel-subtitle">Select a quiz to begin</div>
+            <div class="sel-title" id="sel-title">Home</div>
+            <div class="sel-subtitle" id="sel-subtitle">Your loaded decks</div>
           </div>
         </div>
         <div class="sel-actions">
-          <button class="btn-sel-action btn-sel-secondary" onclick="goToUpload()">📁 Change Folder</button>
+          <button class="btn-sel-action btn-sel-secondary" id="sel-load-btn" onclick="toggleUploadPanel()">📥 Load New Deck</button>
+        </div>
+      </div>
+
+      <!-- Inline upload panel (hidden by default) -->
+      <div id="sel-upload-panel" class="sel-upload-panel" style="display:none;">
+        <div class="sel-upload-panel-inner">
+          <button class="btn-shared-deck" onclick="loadSharedDeck()">📥 Load Main Deck</button>
+          <div class="shared-deck-divider">or upload your own</div>
+          <div class="drop-zone" id="sel-drop-zone" onclick="document.getElementById('file-input').click()">
+            <span class="ico">📦</span>
+            <strong>Drop your .apkg file here</strong>
+            <p>or click to choose a file</p>
+          </div>
+          <div class="upload-actions">
+            <button class="btn-upload" onclick="event.stopPropagation(); document.getElementById('file-input').click()">📦 Choose APKG File</button>
+            <button class="btn-upload secondary" onclick="event.stopPropagation(); document.getElementById('folder-input').click()">📁 Choose Folder</button>
+          </div>
         </div>
       </div>
 
@@ -1461,7 +1525,7 @@ kbd {
 
       <div class="top-bar">
         <div class="top-bar-left">
-          <button class="btn-back" id="back-btn" onclick="goBackFromQuiz()">← Back</button>
+          <button class="btn-back" id="back-btn" onclick="goBackFromQuiz()">🏠 Home</button>
           <div class="deck-name" id="deck-name">Deck</div>
         </div>
         <div class="top-bar-right">
@@ -2152,7 +2216,7 @@ const HISTORY_KEY_PREFIX = 'apkg_history_';
 // ============================================================
 function show(name) {
   S.currentScreen = name;
-  document.getElementById('upload-screen').style.display    = name==='upload'    ? 'flex'  : 'none';
+  document.getElementById('upload-screen').style.display    = 'none'; // always hidden
   document.getElementById('selection-screen').style.display = name==='selection' ? 'block' : 'none';
   document.getElementById('loading-screen').style.display   = name==='loading'   ? 'flex'  : 'none';
   document.getElementById('quiz-screen').style.display      = name==='quiz'      ? 'block' : 'none';
@@ -2240,17 +2304,8 @@ function toggleRandomizeChoices() {
 // NAVIGATION: Back buttons (unchanged except goBackFromQuiz)
 // ============================================================
 function goToUpload() {
-  S.hasSelection = false;
-  S.isDeckSelection = false;
-  S.loadedQuizzes = [];
-  S.folderRootName = '';
-  S.apkgFile = null;
-  S.apkgBuf = null;
-  S.apkgZip = null;
-  S.apkgDecks = [];
-  try { document.getElementById('file-input').value = ''; } catch {}
-  try { document.getElementById('folder-input').value = ''; } catch {}
-  show('upload');
+  // Legacy: now just opens the upload panel on the home screen
+  showHomeScreen(true);
 }
 
 function goBackFromQuiz() {
@@ -2265,16 +2320,98 @@ function goBackFromQuiz() {
   try { localStorage.removeItem('apkg_score_' + S.deckKey); } catch {}
   document.getElementById('checklist-sidebar').style.display = 'none';
   document.getElementById('checklist-list').innerHTML = '';
+  showHomeScreen(false);
+}
+
+// Open/close the inline upload panel on the selection/home screen
+function toggleUploadPanel(forceOpen) {
+  const panel = document.getElementById('sel-upload-panel');
+  const btn   = document.getElementById('sel-load-btn');
+  if (!panel) return;
+  const open = forceOpen !== undefined ? forceOpen : (panel.style.display === 'none');
+  panel.style.display = open ? '' : 'none';
+  if (btn) btn.textContent = open ? '✕ Close' : '📥 Load New Deck';
+}
+
+// Main home-screen renderer — always shows selection screen
+async function showHomeScreen(openUploadPanel) {
+  // Close upload panel by default unless explicitly requested
+  const panel = document.getElementById('sel-upload-panel');
+  if (panel) panel.style.display = 'none';
+  const loadBtn = document.getElementById('sel-load-btn');
+  if (loadBtn) loadBtn.textContent = '📥 Load New Deck';
 
   if (S.isDeckSelection && S.apkgDecks.length) {
+    // Multi-deck APKG — show deck tree
     renderDeckSelectionScreen(S.apkgDecks, S.apkgFile ? S.apkgFile.name : '');
     show('selection');
   } else if (S.hasSelection && S.loadedQuizzes.length) {
+    // Folder loaded — show folder quizzes
+    const selTitle = document.getElementById('sel-title');
+    if (selTitle) selTitle.textContent = 'Home';
+    renderSelectionScreen();
     show('selection');
   } else {
-    show('upload');
+    // No folder loaded — show cached IDB decks
+    await renderCachedDecksScreen();
+    show('selection');
   }
+
+  if (openUploadPanel) toggleUploadPanel(true);
 }
+
+async function renderCachedDecksScreen() {
+  const selTitle    = document.getElementById('sel-title');
+  const selSubtitle = document.getElementById('sel-subtitle');
+  const folderInfo  = document.getElementById('sel-folder-info');
+  if (selTitle)    selTitle.textContent    = 'Home';
+  if (folderInfo)  folderInfo.style.display = 'none';
+
+  const container = document.getElementById('selection-content');
+  if (!container) return;
+
+  const cachedKeys = await idbKeys();
+
+  if (!cachedKeys.length) {
+    if (selSubtitle) selSubtitle.textContent = 'No decks loaded yet';
+    container.innerHTML = `
+      <div class="home-empty-state">
+        <span class="he-icon">🃏</span>
+        <h3>No decks loaded yet</h3>
+        <p>Load a deck from GitHub or upload your own .apkg file to get started.</p>
+        <button class="btn-load-first" onclick="toggleUploadPanel(true)">📥 Load a Deck</button>
+      </div>`;
+    return;
+  }
+
+  if (selSubtitle) selSubtitle.textContent = `${cachedKeys.length} cached deck${cachedKeys.length !== 1 ? 's' : ''}`;
+
+  const cards = cachedKeys.map(name => `
+    <div class="quiz-card" onclick="loadCachedDeck('${escHtml(name)}')">
+      <div class="quiz-card-icon">📦</div>
+      <div class="quiz-card-info">
+        <div class="quiz-card-name">${escHtml(name)}</div>
+        <div class="quiz-card-count count-loaded"><span class="count-dot"></span>⚡ Cached</div>
+      </div>
+      <div class="quiz-card-arrow">→</div>
+    </div>`).join('');
+
+  container.innerHTML = `
+    <div class="quiz-group cached-decks-section">
+      <div class="quiz-group-header">
+        📦 Cached Decks
+        <span class="quiz-group-count">${cachedKeys.length}</span>
+      </div>
+      <div class="quiz-cards-list">${cards}</div>
+    </div>`;
+}
+
+async function loadCachedDeck(name) {
+  const url = DECK_BASE_URL + encodeURIComponent(name + '.apkg');
+  await loadDeckByUrl(url, name);
+}
+
+
 
 // ============================================================
 // FOLDER LOADING & SELECTION SCREEN (unchanged)
@@ -2328,6 +2465,8 @@ async function handleFolderInput(files) {
   });
   S.hasSelection = true;
   S.folderRootName = rootName;
+  const selTitle = document.getElementById('sel-title');
+  if (selTitle) selTitle.textContent = 'Choose a Quiz';
   document.getElementById('sel-folder-name').textContent = rootName;
   document.getElementById('sel-total-badge').textContent = `${S.loadedQuizzes.length} quiz${S.loadedQuizzes.length !== 1 ? 'zes' : ''}`;
   document.getElementById('sel-folder-info').style.display = 'inline-flex';
@@ -3419,6 +3558,9 @@ function stopTimer() {
 function resetTimer() {
   stopTimer();
   S.timerElapsed = S.timerLimit > 0 ? S.timerLimit : 0;
+  // Restore timer chip inner HTML in case it was overwritten
+  const dispEl = document.getElementById('timer-display');
+  if (dispEl) dispEl.textContent = '0:00';
   updateTimerDisplay();
 }
 
@@ -3437,8 +3579,8 @@ function tickTimer() {
     if (S.timerElapsed <= 0) {
       stopTimer();
       if (!S.submitted && S.answerableCount > 0) {
-        const chip = document.getElementById('timer-chip');
-        if (chip) chip.textContent = '⏰ Time\'s up!';
+        const dispEl2 = document.getElementById('timer-display');
+        if (dispEl2) dispEl2.textContent = "⏰ Time's up!";
         for (let i = 0; i < S.notes.length; i++) {
           if (S.answered[i] === undefined && S.shuffles[i] !== null) {
             S.answered[i] = { chosen: -1, ok: false, chosenText: '', skipped: true };
@@ -3828,15 +3970,15 @@ function renderDeckSelectionScreen(decks, fileName) {
   const dispName = fileName.replace(/\.apkg$/i, '');
   const leafCount = decks.filter(d => !decks.some(o => o.name.startsWith(d.name + '::'))).length;
 
+  const selTitle = document.getElementById('sel-title');
+  if (selTitle) selTitle.textContent = 'Choose a Deck';
+
   document.getElementById('sel-subtitle').textContent =
     `${decks.length} deck${decks.length !== 1 ? 's' : ''} · ${leafCount} quiz${leafCount !== 1 ? 'zes' : ''}`;
   document.getElementById('sel-folder-name').textContent = dispName;
   document.getElementById('sel-total-badge').textContent =
     `${decks.length} deck${decks.length !== 1 ? 's' : ''}`;
   document.getElementById('sel-folder-info').style.display = 'inline-flex';
-
-  const actBtn = document.querySelector('#selection-screen .sel-actions button');
-  if (actBtn) { actBtn.textContent = '📦 Load Different File'; actBtn.onclick = goToUpload; }
 
   const tree = buildDeckTree(decks);
   const container = document.getElementById('selection-content');
@@ -4008,15 +4150,6 @@ async function loadApkgCore(fileName, zip, buf, deckFilter) {
     syncCfgInputs(); updateScoreUI();
     document.getElementById('deck-name').textContent = '📚 ' + displayName;
 
-    const backBtn = document.getElementById('back-btn');
-    if (S.isDeckSelection || S.hasSelection) {
-      backBtn.textContent = '← Quiz List';
-      backBtn.title = 'Back to quiz selection';
-    } else {
-      backBtn.textContent = '← Home';
-      backBtn.title = 'Back to upload screen';
-    }
-
     show('quiz');
     loadTakeCount(S.deckKey); // fire-and-forget — populates S.takeCount in background
 
@@ -4069,6 +4202,26 @@ dz.addEventListener('drop', e => {
   }
 });
 
+// Also wire up the sel-drop-zone in the selection screen upload panel
+const selDz = document.getElementById('sel-drop-zone');
+if (selDz) {
+  selDz.addEventListener('dragover',  e => { e.preventDefault(); selDz.classList.add('drag-over'); });
+  selDz.addEventListener('dragleave', () => selDz.classList.remove('drag-over'));
+  selDz.addEventListener('drop', e => {
+    e.preventDefault(); selDz.classList.remove('drag-over');
+    const files = e.dataTransfer.files;
+    if (!files.length) return;
+    if (files.length === 1 && files[0].name.toLowerCase().endsWith('.apkg')) {
+      loadApkg(files[0]);
+    } else {
+      const apkgFiles = Array.from(files).filter(f => f.name.toLowerCase().endsWith('.apkg'));
+      if (apkgFiles.length > 1) handleFolderInput(files);
+      else if (apkgFiles.length === 1) loadApkg(apkgFiles[0]);
+      else alert('Please drop a .apkg file or a folder containing .apkg files.');
+    }
+  });
+}
+
 document.addEventListener('keydown', e => {
   if (S.currentScreen !== 'quiz') return;
   if (e.target.tagName === 'INPUT') return;
@@ -4099,8 +4252,8 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// Initialize
-show('upload');
+// Initialize — go to home screen (shows cached decks or empty state with upload prompt)
+showHomeScreen();
 </script>
 </body>
 </html>
