@@ -3118,6 +3118,7 @@ async function applyQuizStart() {
   updateTimerDisplay();
 
   S.quizStartTime = Date.now();
+  S.isRetrySession = false;  // ← normal quiz, always save to history
 
   if (_qsMode !== 'none') {
     startTimer();
@@ -3923,8 +3924,8 @@ async function submitQuiz() {
   showCompletionPopup();
   updateChecklist();
 
-  // ── Save history in background (fire-and-forget) ──
-  (async () => {
+  // ── Save history in background (fire-and-forget) — skip for retry sessions ──
+  if (!S.isRetrySession) (async () => {
     try {
       const correct = Object.values(S.answered).filter(a => a.ok).length;
       const answerable = S.answerableCount;
@@ -4773,6 +4774,7 @@ function retryWrongAnswers() {
   S.quizComplete = false;
   S.revealAnswers = false;
   S.submitted = false;
+  S.isRetrySession = true;   // ← flag: don't save this to history
   S.quizStartTime = Date.now();
 
   for (let i = 0; i < S.notes.length; i++) getShuffle(i);
