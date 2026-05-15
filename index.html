@@ -5123,7 +5123,7 @@ function toggleSelectMode() {
   var btn = document.getElementById('sel-select-btn');
   if (btn) {
     btn.classList.toggle('select-active', S.selectMode);
-    btn.textContent = S.selectMode ? '\u2715 Cancel Select' : '\\u2611 Multi-Select';
+    btn.textContent = S.selectMode ? '\u2715 Cancel Select' : '\u2611 Multi-Select';
   }
   document.querySelectorAll('.card-selected').forEach(function(c) {
     c.classList.remove('card-selected');
@@ -5177,7 +5177,7 @@ async function startMultiSelect() {
   var items = S.selectedItems.slice();
   S.selectedItems = []; S.selectMode = false;
   var btn = document.getElementById('sel-select-btn');
-  if (btn) { btn.classList.remove('select-active'); btn.textContent = '\\u2611 Multi-Select'; }
+  if (btn) { btn.classList.remove('select-active'); btn.textContent = '\u2611 Multi-Select'; }
   document.getElementById('multi-select-bar').classList.remove('visible');
   document.querySelectorAll('.card-selected').forEach(function(c) {
     c.classList.remove('card-selected');
