@@ -1779,7 +1779,7 @@ kbd {
         </div>
         <div class="sel-actions">
           <button class="btn-sel-action btn-sel-secondary" id="sel-load-btn" onclick="toggleUploadPanel()">📥 Load New Deck</button>
-          <button class="btn-sel-action btn-sel-secondary" id="sel-select-btn" onclick="toggleSelectMode()" style="display:none;">&#x2611; Multi-Select</button>
+          <button class="btn-sel-action btn-sel-secondary" id="sel-select-btn" onclick="toggleSelectMode()" style="display:none;">u2611 Multi-Select</button>
         </div>
       </div>
 
@@ -2595,7 +2595,7 @@ function show(name) {
     var _msBar = document.getElementById('multi-select-bar');
     if (_msBar) _msBar.classList.remove('visible');
     var _msBtn = document.getElementById('sel-select-btn');
-    if (_msBtn) { _msBtn.classList.remove('select-active'); _msBtn.textContent = '&#x2611; Multi-Select'; }
+    if (_msBtn) { _msBtn.classList.remove('select-active'); _msBtn.textContent = 'u2611 Multi-Select'; }
   }
 }
 function status(msg) { document.getElementById('status-msg').textContent = msg; }
